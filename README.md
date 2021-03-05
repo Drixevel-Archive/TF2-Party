@@ -1,2 +1,2 @@
-# TF2-Invisifortress
-An experimental gamemode involving invisibility for Team Fortress 2.
+# TF2-Party
+An experimental gamemode for Team Fortress 2 which replicates the Mario Party games.
