@@ -140,6 +140,11 @@ enum struct Pawn
 	{
 		CBaseCombatCharacter(this.npc.GetEntity()).Teleport(origin);
 	}
+
+	void Delete()
+	{
+		AcceptEntityInput(this.npc.GetEntity(), "Kill");
+	}
 }
 
 Pawn g_Pawn[MAXPLAYERS + 1];
@@ -169,6 +174,9 @@ public void OnPluginStart()
 
 	RegAdminCmd("sm_spawnpawn", Command_SpawnPawn, ADMFLAG_ROOT, "Spawn a pawn on the map.");
 	RegAdminCmd("sm_telepawn", Command_TelePawn, ADMFLAG_ROOT, "Teleport a pawn on the map.");
+	RegAdminCmd("sm_teleportpawn", Command_TelePawn, ADMFLAG_ROOT, "Teleport a pawn on the map.");
+	RegAdminCmd("sm_delpawn", Command_DelPawn, ADMFLAG_ROOT, "Delete a pawn on the map.");
+	RegAdminCmd("sm_deletepawn", Command_DelPawn, ADMFLAG_ROOT, "Delete a pawn on the map.");
 
 	for (int i = 1; i <= MaxClients; i++)
 		g_Pawn[i].Init();
@@ -352,4 +360,11 @@ public bool TraceRayDontHitEntity(int entity,int mask,any data)
 	if (entity == data) return false;
 	if (entity != 0) return false;
 	return true;
+}
+
+public Action Command_DelPawn(int client, int args)
+{
+	g_Pawn[client].Delete();
+	CPrintToChat(client, "Pawn has been deleted.");
+	return Plugin_Handled;
 }
