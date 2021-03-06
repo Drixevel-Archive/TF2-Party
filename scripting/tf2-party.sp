@@ -67,5 +67,11 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	
+	RegConsoleCmd("sm_coins", Command_Coins, "Shows how many coins you have in chat.");
+}
+
+public Action Command_Coins(int client, int args)
+{
+	PrintToChat(client, "You have %i coins.", g_Coins[client].coins);
+	return Plugin_Handled;
 }
