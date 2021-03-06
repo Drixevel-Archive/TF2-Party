@@ -35,20 +35,34 @@ enum struct Coins
 			this.coins = MAX_COINS;
 	}
 
-	void AddCoins(int coins)
+	bool AddCoins(int coins, bool force = false)
 	{
 		this.coins += coins;
 
 		if (this.coins > MAX_COINS)
-			this.coins = MAX_COINS;
+		{
+			if (force)
+				this.coins = MAX_COINS;
+			
+			return false;
+		}
+
+		return true;
 	}
 
-	void RemoveCoins(int coins)
+	bool RemoveCoins(int coins, bool force = false)
 	{
 		this.coins -= coins;
 
 		if (this.coins < 0)
-			this.coins = 0;
+		{
+			if (force)
+				this.coins = 0;
+			
+			return false;
+		}
+
+		return true;
 	}
 }
 
