@@ -148,7 +148,6 @@ enum struct Pawn
 
 	void Move(float origin[3])
 	{
-		origin[2] += 10.0;
 		pPath[this.npc.Index].ComputeToPos(this.npc.GetBot(), origin, 9999999999.0);
 		pPath[this.npc.Index].SetMinLookAheadDistance(300.0);
 	}
@@ -392,6 +391,7 @@ public Action Command_MovePawn(int client, int args)
 	TR_GetEndPosition(endPos, hTrace);
 	delete hTrace;
 
+	endPos[2] += 10.0;
 	g_Pawn[client].Move(endPos);
 	CPrintToChat(client, "Pawn has been moved.");
 
