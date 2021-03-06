@@ -135,6 +135,11 @@ enum struct Pawn
 			SetEntPropFloat(npcEntity.iEnt, Prop_Data, "m_flCycle", 0.0);
 		}
 	}
+
+	void Teleport(float origin[3])
+	{
+		CBaseCombatCharacter(this.npc.GetEntity()).Teleport(origin);
+	}
 }
 
 Pawn g_Pawn[MAXPLAYERS + 1];
@@ -163,6 +168,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_setcoins", Command_SetCoins, ADMFLAG_ROOT, "Set your own coins or others coins.");
 
 	RegAdminCmd("sm_spawnpawn", Command_SpawnPawn, ADMFLAG_ROOT, "Spawn a pawn on the map.");
+	RegAdminCmd("sm_telepawn", Command_TelePawn, ADMFLAG_ROOT, "Teleport a pawn on the map.");
 
 	for (int i = 1; i <= MaxClients; i++)
 		g_Pawn[i].Init();
@@ -323,6 +329,21 @@ public Action Command_SpawnPawn(int client, int args)
 	g_Pawn[client].Spawn(endPos);
 	CPrintToChat(client, "Pawn has been spawned.");
 
+	return Plugin_Handled;
+}
+
+public Action Command_TelePawn(int client, int args)
+{
+	float eyePos[3], eyeAng[3], endPos[3];
+	GetClientEyePosition(client, eyePos);
+	GetClientEyeAngles(client, eyeAng);
+	
+	Handle hTrace = TR_TraceRayFilterEx(eyePos, eyeAng, MASK_NPCSOLID, RayType_Infinite, TraceRayDontHitEntity, client);
+	TR_GetEndPosition(endPos, hTrace);
+	delete hTrace;
+
+	g_Pawn[client].Teleport(endPos);
+	CPrintToChat(client, "Pawn has been teleported.");
 	return Plugin_Handled;
 }
 
