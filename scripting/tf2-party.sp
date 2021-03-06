@@ -14,6 +14,7 @@
 /*****************************/
 //Includes
 #include <sourcemod>
+#include <misc-colors>
 
 /*****************************/
 //ConVars
@@ -83,6 +84,8 @@ public void OnPluginStart()
 {
 	LoadTranslations("common.phrases");
 
+	CSetPrefix("{ancient}[{aliceblue}Party{ancient}]{honeydew}");
+
 	RegConsoleCmd("sm_coins", Command_Coins, "Shows how many coins you have in chat.");
 
 	RegAdminCmd("sm_setcoins", Command_SetCoins, ADMFLAG_ROOT, "Set your own coins or others coins.");
@@ -90,7 +93,7 @@ public void OnPluginStart()
 
 public Action Command_Coins(int client, int args)
 {
-	PrintToChat(client, "You have %i coins.", g_Coins[client].coins);
+	CPrintToChat(client, "You have %i coins.", g_Coins[client].coins);
 	return Plugin_Handled;
 }
 
@@ -106,7 +109,7 @@ public Action Command_SetCoins(int client, int args)
 
 		if (target == -1)
 		{
-			PrintToChat(client, "Target %s not found, please try again.", sTarget);
+			CPrintToChat(client, "Target %s not found, please try again.", sTarget);
 			return Plugin_Handled;
 		}
 	}
@@ -118,11 +121,11 @@ public Action Command_SetCoins(int client, int args)
 	g_Coins[target].SetCoins(amount);
 
 	if (client == target)
-		PrintToChat(client, "You have set your own coins to %i.", g_Coins[target].coins);
+		CPrintToChat(client, "You have set your own coins to %i.", g_Coins[target].coins);
 	else
 	{
-		PrintToChat(client, "You have set %N's coins to %i.", target, g_Coins[target].coins);
-		PrintToChat(target, "%N has set your coins to %i.", client, g_Coins[target].coins);
+		CPrintToChat(client, "You have set %N's coins to %i.", target, g_Coins[target].coins);
+		CPrintToChat(target, "%N has set your coins to %i.", client, g_Coins[target].coins);
 	}
 
 	return Plugin_Handled;
