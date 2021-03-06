@@ -87,21 +87,20 @@ enum struct Coins
 
 Coins g_Coins[MAXPLAYERS + 1];
 
+PathFollower pPath[MAX_NPCS];
+
 enum struct Pawn
 {
 	CBaseNPC npc;
-	PathFollower path;
 
 	void Init()
 	{
 		this.npc = INVALID_NPC;
-		this.path = PathFollower(_, Path_FilterIgnoreActors, Path_FilterOnlyActors);
 	}
 
 	void Clear()
 	{
 		this.npc = INVALID_NPC;
-		this.path.Destroy();
 	}
 
 	void Spawn(float origin[3])
@@ -144,6 +143,14 @@ enum struct Pawn
 	void Delete()
 	{
 		AcceptEntityInput(this.npc.GetEntity(), "Kill");
+		this.npc = INVALID_NPC;
+	}
+
+	void Move(float origin[3])
+	{
+		origin[2] += 10.0;
+		pPath[this.npc.Index].ComputeToPos(this.npc.GetBot(), origin, 9999999999.0);
+		pPath[this.npc.Index].SetMinLookAheadDistance(300.0);
 	}
 }
 
@@ -177,9 +184,21 @@ public void OnPluginStart()
 	RegAdminCmd("sm_teleportpawn", Command_TelePawn, ADMFLAG_ROOT, "Teleport a pawn on the map.");
 	RegAdminCmd("sm_delpawn", Command_DelPawn, ADMFLAG_ROOT, "Delete a pawn on the map.");
 	RegAdminCmd("sm_deletepawn", Command_DelPawn, ADMFLAG_ROOT, "Delete a pawn on the map.");
+	RegAdminCmd("sm_movepawn", Command_MovePawn, ADMFLAG_ROOT, "Move a pawn on the map.");
+
+	for (int i = 0; i < MAX_NPCS; i++)
+		pPath[i] = PathFollower(_, Path_FilterIgnoreActors, Path_FilterOnlyActors);
 
 	for (int i = 1; i <= MaxClients; i++)
-		g_Pawn[i].Init();
+		if (IsClientInGame(i))
+			OnClientPutInServer(i);
+}
+
+public void OnPluginEnd()
+{
+	for (int i = 1; i <= MaxClients; i++)
+		if (g_Pawn[i].npc != INVALID_NPC)
+			g_Pawn[i].Delete();
 }
 
 public void OnMapStart()
@@ -352,6 +371,30 @@ public Action Command_TelePawn(int client, int args)
 
 	g_Pawn[client].Teleport(endPos);
 	CPrintToChat(client, "Pawn has been teleported.");
+
+	return Plugin_Handled;
+}
+
+public Action Command_DelPawn(int client, int args)
+{
+	g_Pawn[client].Delete();
+	CPrintToChat(client, "Pawn has been deleted.");
+	return Plugin_Handled;
+}
+
+public Action Command_MovePawn(int client, int args)
+{
+	float eyePos[3], eyeAng[3], endPos[3];
+	GetClientEyePosition(client, eyePos);
+	GetClientEyeAngles(client, eyeAng);
+	
+	Handle hTrace = TR_TraceRayFilterEx(eyePos, eyeAng, MASK_NPCSOLID, RayType_Infinite, TraceRayDontHitEntity, client);
+	TR_GetEndPosition(endPos, hTrace);
+	delete hTrace;
+
+	g_Pawn[client].Move(endPos);
+	CPrintToChat(client, "Pawn has been moved.");
+
 	return Plugin_Handled;
 }
 
@@ -360,11 +403,4 @@ public bool TraceRayDontHitEntity(int entity,int mask,any data)
 	if (entity == data) return false;
 	if (entity != 0) return false;
 	return true;
-}
-
-public Action Command_DelPawn(int client, int args)
-{
-	g_Pawn[client].Delete();
-	CPrintToChat(client, "Pawn has been deleted.");
-	return Plugin_Handled;
 }
